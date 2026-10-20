@@ -1,0 +1,115 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Social Profile | File Manager</title>
+  <link rel="stylesheet" href="/stylesheet/style.css">
+</head>
+<body>
+  <main class="container">
+    <header class="page-header">
+      <div>
+        <p class="eyebrow">PERSONAL WORKSPACE</p>
+        <h1>File Manager</h1>
+        <p class="subtitle">Create files, make folders, and keep everything organized.</p>
+      </div>
+      <div class="summary-card">
+        <span>Files in this folder</span>
+        <strong><%= files.length %></strong>
+        <small><%= totalSize < 1024 ? `${totalSize} B` : `${(totalSize / 1024).toFixed(1)} KB` %> used</small>
+      </div>
+    </header>
+
+    <nav class="breadcrumbs" aria-label="Folder path">
+      <a href="/">🏠 Home</a>
+      <% breadcrumbs.forEach((crumb) => { %>
+        <span>›</span><a href="/?dir=<%= encodeURIComponent(crumb.path) %>"><%= crumb.name %></a>
+      <% }) %>
+    </nav>
+
+    <div class="create-layout">
+      <section class="panel create-panel">
+        <h2>Create a new file</h2>
+        <form action="/create" method="post" class="create-form">
+          <input type="hidden" name="dir" value="<%= currentDir %>">
+          <label for="title">File name</label>
+          <input id="title" type="text" name="title" placeholder="e.g. meeting-notes" maxlength="80" required>
+          <label for="body">Content</label>
+          <textarea id="body" name="body" placeholder="Write something to save in this file..."></textarea>
+          <button type="submit" class="button primary">+ Create file</button>
+        </form>
+      </section>
+      <section class="panel create-panel folder-panel">
+        <h2>Create a folder</h2>
+        <p class="muted">Make a folder to group related files.</p>
+        <form action="/folders/create" method="post" class="create-form">
+          <input type="hidden" name="dir" value="<%= currentDir %>">
+          <label for="folderName">Folder name</label>
+          <input id="folderName" type="text" name="folderName" placeholder="e.g. College Notes" maxlength="80" required>
+          <button type="submit" class="button secondary">+ Create folder</button>
+        </form>
+      </section>
+    </div>
+
+    <section class="file-section">
+      <div class="section-heading">
+        <div><h2>This folder</h2><p class="muted">Open folders to browse their contents.</p></div>
+        <div class="toolbar">
+          <input type="search" id="fileSearch" placeholder="Search this folder..." aria-label="Search files and folders" autocomplete="off">
+          <select id="sortFiles" aria-label="Sort entries">
+            <option value="name-asc">Name: A to Z</option>
+            <option value="name-desc">Name: Z to A</option>
+            <option value="newest">Recently modified</option>
+            <option value="oldest">Oldest modified</option>
+            <option value="largest">Largest first</option>
+          </select>
+        </div>
+      </div>
+      <p id="searchMessage" class="search-message" aria-live="polite"></p>
+
+      <% if (currentDir) { %>
+        <a class="up-link" href="/?dir=<%= encodeURIComponent(currentDir.split('/').slice(0, -1).join('/')) %>">↑ Go to parent folder</a>
+      <% } %>
+
+      <% if (entries.length > 0) { %>
+        <div class="file-grid" id="fileList">
+          <% entries.forEach((entry) => { %>
+            <article class="file-card <%= entry.type === 'folder' ? 'folder-card' : '' %>" data-name="<%= entry.name %>" data-size="<%= entry.size %>" data-modified="<%= entry.modified.getTime() %>" data-type="<%= entry.type %>">
+              <div class="file-icon <%= entry.type === 'folder' ? 'folder-icon' : '' %>" aria-hidden="true"><%= entry.type === 'folder' ? 'DIR' : 'TXT' %></div>
+              <div class="file-info">
+                <h3 title="<%= entry.name %>"><%= entry.name %></h3>
+                <p><%= entry.sizeLabel %> · Modified <%= entry.modified.toLocaleString() %></p>
+              </div>
+              <div class="file-actions">
+                <% if (entry.type === 'folder') { %>
+                  <a href="/?dir=<%= encodeURIComponent(entry.relativePath.split('\\').join('/')) %>">Open folder →</a>
+                  <form action="/folders/delete" method="post" onsubmit="return confirm('Delete this empty folder? Folders containing files cannot be deleted.')">
+                    <input type="hidden" name="folder" value="<%= entry.relativePath.split('\\').join('/') %>">
+                    <input type="hidden" name="dir" value="<%= currentDir %>">
+                    <button type="submit" class="delete-link">Delete empty folder</button>
+                  </form>
+                <% } else { %>
+                  <a href="/about?file=<%= encodeURIComponent(entry.relativePath.split('\\').join('/')) %>">Open</a>
+                  <a href="/download?file=<%= encodeURIComponent(entry.relativePath.split('\\').join('/')) %>">Download</a>
+                  <a href="/update?file=<%= encodeURIComponent(entry.relativePath.split('\\').join('/')) %>">Rename / Edit</a>
+                  <form action="/delete" method="post" onsubmit="return confirm('Delete this file? This cannot be undone.')">
+                    <input type="hidden" name="delete" value="<%= entry.relativePath.split('\\').join('/') %>">
+                    <input type="hidden" name="dir" value="<%= currentDir %>">
+                    <button type="submit" class="delete-link">Delete</button>
+                  </form>
+                <% } %>
+              </div>
+            </article>
+          <% }) %>
+        </div>
+        <p id="emptySearch" class="empty-state" hidden>No files or folders match your search.</p>
+      <% } else { %>
+        <div class="empty-state">This folder is empty. Create a file or folder above.</div>
+      <% } %>
+    </section>
+    <footer>Simple file management · Files and folders are stored locally inside <code>files</code>.</footer>
+  </main>
+  <script src="/javascript/search.js"></script>
+</body>
+</html>

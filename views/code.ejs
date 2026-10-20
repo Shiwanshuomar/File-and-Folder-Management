@@ -1,0 +1,15 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title><%= filename %> | File Manager</title><link rel="stylesheet" href="/stylesheet/styles.css">
+</head>
+<body>
+  <main class="document-page">
+    <a href="/?dir=<%= encodeURIComponent(parentDir) %>" class="back">← Back to folder</a>
+    <div class="document-heading"><div class="file-icon">TXT</div><div><p class="eyebrow">FILE PREVIEW</p><h1><%= filename %></h1><p class="muted"><%= size < 1024 ? `${size} B` : `${(size / 1024).toFixed(1)} KB` %> · Modified <%= modified.toLocaleString() %></p></div></div>
+    <section class="content-box"><pre><%= filedata || 'This file is empty.' %></pre></section>
+    <div class="document-actions"><a class="button primary" href="/download?file=<%= encodeURIComponent(relativePath) %>">Download file</a><a class="button secondary" href="/update?file=<%= encodeURIComponent(relativePath) %>">Rename / Edit</a></div>
+  </main>
+</body>
+</html>

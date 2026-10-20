@@ -1,0 +1,16 @@
+<!DOCTYPE html>
+<html lang="en">
+<head><meta charset="UTF-8"><meta name="viewport" content="width=device-width, initial-scale=1.0"><title>Edit file | File Manager</title><link rel="stylesheet" href="/stylesheet/style3.css"></head>
+<body>
+  <main class="edit-page">
+    <a href="/?dir=<%= encodeURIComponent(parentDir) %>" class="back">← Cancel and go back</a>
+    <p class="eyebrow">FILE SETTINGS</p><h1>Rename or edit file</h1><p class="muted">This file stays in its current folder. The .txt extension is added automatically.</p>
+    <form action="/update" method="post" class="edit-form">
+      <input type="hidden" name="oldname" value="<%= relativePath %>">
+      <label for="newname">File name</label><input id="newname" class="name" name="newname" value="<%= filename.replace(/\.txt$/i, '') %>" maxlength="80" required>
+      <label for="newcontent">File content</label><textarea id="newcontent" class="content" name="newcontent" rows="14"><%= filedata %></textarea>
+      <button type="submit" class="button primary">Save changes</button>
+    </form>
+  </main>
+</body>
+</html>
